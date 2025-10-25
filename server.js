@@ -215,7 +215,7 @@ const getASUSSensors = async () => {
     if (processResult.stdout.trim()) {
       // ProArt Creator Hub çalışıyor - gerçek veri kullanılabilir
       // Şimdilik simüle edilmiş ama gerçekçi veri döndür
-      return Math.random() * 15 + 55; // 55-70°C arası
+      return Math.random() * 25 + 45; // 45-70°C arası
     }
     
     return null;
@@ -286,9 +286,9 @@ const getGPUTemperature = async () => {
       const graphics = await safeCall(() => si.graphics(), { controllers: [] });
       if (graphics && graphics.controllers && graphics.controllers.length > 0) {
         const gpuUsage = graphics.controllers[0].utilizationGpu || 0;
-        // GPU sıcaklık skalası: 30°C (idle) - 85°C (max load)
-        const minTemp = 30; // Minimum idle sıcaklık
-        const maxTemp = 85; // Maksimum yük altında sıcaklık
+        // GPU sıcaklık skalası: 45°C (idle) - 70°C (max load)
+        const minTemp = 45; // Minimum idle sıcaklık
+        const maxTemp = 70; // Maksimum yük altında sıcaklık
         const tempRange = maxTemp - minTemp;
         
         // GPU kullanımına göre sıcaklık hesapla
@@ -304,7 +304,7 @@ const getGPUTemperature = async () => {
     
     // Fallback
     if (cache.gpuTemp === 0) {
-      const fallbackTemp = 40; // Sabit fallback değer
+      const fallbackTemp = 55; // Sabit fallback değer (45-70 aralığında)
       const smoothedTemp = calculateGPUMovingAverage(fallbackTemp);
       cache.gpuTemp = smoothedTemp;
     }
@@ -312,7 +312,7 @@ const getGPUTemperature = async () => {
     return cache.gpuTemp;
   } catch (error) {
     // Hata durumunda cache'den dön
-    return cache.gpuTemp || 40;
+    return cache.gpuTemp || 55;
   }
 };
 

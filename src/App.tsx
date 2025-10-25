@@ -226,13 +226,13 @@ const App: React.FC = () => {
             <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
               <div 
                 className="bg-orange-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${Math.min(100, (smoothedGpu / 100) * 100)}%` }}
+                style={{ width: `${Math.min(100, Math.max(0, ((smoothedGpu - 45) / 25) * 100))}%` }}
               ></div>
             </div>
             <div className="text-sm text-gray-600">
               <div className="flex items-center space-x-2">
                 <ThermometerSun className="w-4 h-4 text-orange-500" />
-                <span>Max: 100°C</span>
+                <span>45-70°C</span>
               </div>
             </div>
           </div>
@@ -352,7 +352,7 @@ const App: React.FC = () => {
 
           {/* GPU Temperature Chart */}
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">GPU Temperature</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">GPU Temperature (45-70°C)</h2>
             <div style={{ transition: 'all 0.3s ease' }}>
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
@@ -364,7 +364,7 @@ const App: React.FC = () => {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="time" stroke="#6b7280" fontSize={12} />
-                <YAxis stroke="#6b7280" fontSize={12} domain={['auto', 'auto']} />
+                <YAxis stroke="#6b7280" fontSize={12} domain={[43, 72]} />
                 <Tooltip />
                 <Area 
                   type="monotone" 

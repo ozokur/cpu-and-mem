@@ -52,7 +52,7 @@ const App: React.FC = () => {
         setMetrics(data);
         setError(null);
 
-        // Chart verisine ekle (60 saniye için 60 veri noktası - her 1 saniyede bir)
+        // Chart verisine ekle (30 saniye için 30 veri noktası - her 1 saniyede bir, optimize edilmiş)
         const now = new Date();
         const timeStr = `${now.getMinutes()}:${now.getSeconds().toString().padStart(2, '0')}`;
         setChartData(prev => {
@@ -62,7 +62,7 @@ const App: React.FC = () => {
             memory: data.memory.percent,
             gpu: data.temperature.gpu
           }];
-          return newData.slice(-60); // Son 60 veriyi tut (60 saniye)
+          return newData.slice(-30); // Son 30 veriyi tut (30 saniye - daha az memory kullanımı)
         });
       } catch (err) {
         setError('Backend sunucusuna bağlanılamıyor. Lütfen "npm run server" komutunu çalıştırın.');
@@ -280,7 +280,7 @@ const App: React.FC = () => {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="time" stroke="#6b7280" fontSize={12} />
-                <YAxis stroke="#6b7280" fontSize={12} domain={[0, 100]} />
+                <YAxis stroke="#6b7280" fontSize={12} domain={['auto', 'auto']} />
                 <Tooltip />
                 <Area 
                   type="monotone" 
@@ -310,7 +310,7 @@ const App: React.FC = () => {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="time" stroke="#6b7280" fontSize={12} />
-                <YAxis stroke="#6b7280" fontSize={12} domain={[0, 100]} />
+                <YAxis stroke="#6b7280" fontSize={12} domain={['auto', 'auto']} />
                 <Tooltip />
                 <Area 
                   type="monotone" 
@@ -340,7 +340,7 @@ const App: React.FC = () => {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="time" stroke="#6b7280" fontSize={12} />
-                <YAxis stroke="#6b7280" fontSize={12} domain={[0, 100]} />
+                <YAxis stroke="#6b7280" fontSize={12} domain={['auto', 'auto']} />
                 <Tooltip />
                 <Area 
                   type="monotone" 

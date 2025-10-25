@@ -14,6 +14,13 @@ const port = 9191; // Ön yüzün veri beklediği port
 // Bu, localhost:3000 gibi farklı bir adresten gelen isteklere izin verir
 app.use(cors());
 
+// Cache sistemi - verileri saklayarak gereksiz işlemleri önle
+const cache = {
+  gpuTemp: 0,
+  lastGpuUpdate: 0,
+  gpuUpdateInterval: 5000, // 5 saniyede bir GPU sıcaklığını güncelle
+};
+
 // Helper function for safe async calls
 const safeCall = async (fn, defaultValue) => {
   try {
@@ -24,15 +31,24 @@ const safeCall = async (fn, defaultValue) => {
   }
 };
 
-// Windows'ta GPU sıcaklığını al
+// Windows'ta GPU sıcaklığını al (cache'li versiyon)
 const getGPUTemperature = async () => {
+  const now = Date.now();
+  
+  // Cache'den dönüş yap - eğer yeterince yakın zamanda güncellendiyse
+  if (now - cache.lastGpuUpdate < cache.gpuUpdateInterval) {
+    return cache.gpuTemp;
+  }
+  
   try {
     // NVIDIA GPU için nvidia-smi komutu
     try {
       const nvidiaCommand = `nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits`;
-      const nvidiaResult = await execAsync(nvidiaCommand, { timeout: 2000 });
+      const nvidiaResult = await execAsync(nvidiaCommand, { timeout: 1000 });
       const nvidiaTemp = parseFloat(nvidiaResult.stdout.trim());
       if (!isNaN(nvidiaTemp) && nvidiaTemp > 0) {
+        cache.gpuTemp = nvidiaTemp;
+        cache.lastGpuUpdate = now;
         return nvidiaTemp;
       }
     } catch (nvidiaError) {
@@ -42,33 +58,30 @@ const getGPUTemperature = async () => {
     // AMD GPU için (WMI)
     try {
       const amdCommand = `powershell -Command "Get-WmiObject -Namespace root\\wmi -Class MSAcpi_ThermalZoneTemperature -ErrorAction SilentlyContinue | Where-Object {$_.CurrentTemperature -ne $null} | Select-Object -First 1 -ExpandProperty CurrentTemperature"`;
-      const amdResult = await execAsync(amdCommand, { timeout: 2000 });
+      const amdResult = await execAsync(amdCommand, { timeout: 1000 });
       let amdTemp = parseFloat(amdResult.stdout.trim());
       if (amdTemp > 0) {
         // Kelvin cinsinden geliyorsa Celsius'a çevir
         if (amdTemp > 100) {
           amdTemp = (amdTemp / 10) - 273.15;
         }
+        cache.gpuTemp = amdTemp;
+        cache.lastGpuUpdate = now;
         return amdTemp;
       }
     } catch (amdError) {
       // AMD bulunamadı
     }
     
-    // Intel GPU için
-    try {
-      const intelCommand = `powershell -Command "Get-CimInstance -Namespace root/wmi -ClassName WmiMonitorBrightnessMethods -ErrorAction SilentlyContinue"`;
-      const intelResult = await execAsync(intelCommand, { timeout: 2000 });
-      // Intel GPU için sıcaklık genelde ayrı bir komut gerektirir
-    } catch (intelError) {
-      // Intel GPU bulunamadı
+    // Hiçbiri çalışmazsa simüle edilmiş veri döndür (her seferinde yeniden hesaplama yerine cache'i kullan)
+    if (cache.gpuTemp === 0) {
+      cache.gpuTemp = Math.random() * 30 + 40; // 40-70°C
     }
-    
-    // Hiçbiri çalışmazsa simüle edilmiş veri döndür
-    return Math.random() * 30 + 40; // 40-70°C
+    cache.lastGpuUpdate = now;
+    return cache.gpuTemp;
   } catch (error) {
-    console.error('GPU sıcaklığı alınırken hata:', error.message);
-    return Math.random() * 30 + 40; // 40-70°C fallback
+    // Hata durumunda cache'den dön
+    return cache.gpuTemp || 45;
   }
 };
 

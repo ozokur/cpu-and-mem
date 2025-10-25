@@ -1,94 +1,83 @@
-# Temperature Chart Visualization
+# CPU and Memory Monitor
 
-A beautiful React application built with Tailwind CSS and Recharts for visualizing temperature data across different cities.
+Sistem kaynaklarınızı gerçek zamanlı olarak izleyin! CPU, Memory, Disk ve Network kullanımını grafiklerle görselleştirin.
 
-## Features
+## 🚀 Hızlı Başlangıç
 
-🌡️ **Dynamic Temperature Visualization**
-- Real-time temperature updates every 3 seconds
-- Smooth line chart animations
-- Multiple city support
+### Kolay Yöntem (.bat dosyası ile)
 
-🏙️ **City Selection**
-- Dropdown to select from 5 major cities:
-  - Istanbul
-  - London
-  - New York
-  - Tokyo
-  - Paris
+1. `start.bat` dosyasına çift tıklayın
+2. Tarayıcı otomatik açılacak
+3. Uygulama `http://localhost:3000` adresinde çalışacak
 
-📊 **Interactive Charts**
-- Beautiful line chart with Recharts
-- Responsive design
-- Tooltips showing exact values
-- Custom styling
-
-🎨 pu **Modern UI**
-- Tailwind CSS for styling
-- Lucide React icons
-- Gradient backgrounds
-- Card-based layout
-- Shadow effects
-
-📈 **Statistics**
-- Current temperature display
-- Min/Average/Max temperature cards
-- Weather icons based on temperature
-- Real-time updates
-
-## Technology Stack
-
-- **React** with TypeScript
-- **Tailwind CSS** for styling
-- **Recharts** for data visualization
-- **Lucide React** for icons
-
-## Installation
+### Manuel Başlatma
 
 ```bash
-# Install dependencies
-npm install
+# 1. Backend sunucusunu başlatın (port 9191)
+npm run server
 
-# Start development server
+# 2. Yeni bir terminal açın ve frontend'i başlatın (port 3000)
 npm start
 ```
 
-## Usage
+### Kapatma
 
-1. Select a city from the dropdown menu
-2. View the temperature chart updating in real-time
-3. Check statistics (Min, Average, Max) below the chart
-4. Temperature updates automatically every 3 seconds
+- `stop.bat` dosyasına çift tıklayın VEYA
+- Tüm terminal pencerelerini kapatın
 
-## Project Structure
+## 📊 Özellikler
 
+- **CPU Kullanımı**: Gerçek zamanlı CPU yüzdesi ve grafik
+- **Memory Kullanımı**: RAM kullanımı ve grafik (GB cinsinden)
+- **Disk Aktivitesi**: Okuma/yazma hızları
+- **Network Kullanımı**: Upload/Download yük göstergesi
+  - Upload: Max 5 MB/s (0-100% scale)
+  - Download: Max 60 MB/s (0-100% scale)
+- **Process Listesi**: En çok kaynak kullanan process'ler
+
+## 🛠️ Teknolojiler
+
+- **Frontend**: React + TypeScript + Tailwind CSS + Recharts
+- **Backend**: Node.js + Express + SystemInformation
+
+## 📦 Kurulum
+
+```bash
+npm install
 ```
-temperature-chart/
-├── src/
-│   ├── App.tsx          # Main component with temperature visualization
-│   ├── index.tsx        # React entry point
-│   └── index.css        # Tailwind CSS imports
-├── tailwind.config.js   # Tailwind configuration
-├── postcss.config.js    # PostCSS configuration
-└── package.json         # Dependencies
+
+## 🌐 Portlar
+
+- **Backend API**: http://localhost:9191
+- **Frontend**: http://localhost:3000
+
+## 📝 API Endpoints
+
+- `GET /api/metrics` - Sistem metrikleri (CPU, Memory, Disk, Network)
+- `GET /api/processes` - Process listesi
+
+## 📸 Görüntüler
+
+Uygulama modern ve kullanıcı dostu bir arayüze sahiptir. Canlı grafikler ve kartlar ile sistem kaynaklarınızı kolayca takip edebilirsiniz.
+
+## 🔧 Özelleştirme
+
+Network maksimum değerlerini değiştirmek için `server.js` dosyasını düzenleyin:
+
+```javascript
+// Upload için max değer (MB/s)
+upload için max 5 MB/s
+
+// Download için max değer (MB/s)
+download için max 60 MB/s
 ```
 
-## Features Visualization
+## ⚠️ Notlar
 
-- **Navigation Bar**: Shows the app title and current selected city
-- **City Dropdown**: Select different cities to view their temperature data
-- **Current Temperature Card**: Large display of current temperature with weather icon
-- **Temperature Chart**: Interactive line chart showing 24-hour forecast
-- **Statistics Cards**: Three cards showing Min, Average, and Max temperatures
+- Windows'ta çalışır
+- Backend sunucusu olmadan frontend çalışmaz
+- Sistem bilgilerine erişim için yönetici hakları gerekmez
 
-## Customization
-
-You can easily customize:
-- Add more cities by modifying the `citiesData` object
-- Change update interval in the `useEffect` hook
-- Modify colors and styling in Tailwind classes
-- Add more chart features using Recharts components
-
-## License
+## 📄 Lisans
 
 MIT

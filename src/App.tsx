@@ -11,6 +11,7 @@ interface Metrics {
     percent: number;
   };
   temperature: {
+    cpu: number;
     gpu: number;
   };
   network: {
@@ -41,6 +42,10 @@ const App: React.FC = () => {
   const [processes, setProcesses] = useState<Process[]>([]);
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [error, setError] = useState<string | null>(null);
+  // Smoothed values for cards display
+  const [smoothedCpu, setSmoothedCpu] = useState<number>(0);
+  const [smoothedMemory, setSmoothedMemory] = useState<number>(0);
+  const [smoothedGpu, setSmoothedGpu] = useState<number>(0);
 
   // Her 2 saniyede bir veri çek
   useEffect(() => {
@@ -52,15 +57,33 @@ const App: React.FC = () => {
         setMetrics(data);
         setError(null);
 
+        // Cards için smoothed değerleri hesapla
+        setSmoothedCpu(prev => prev === 0 ? data.cpu : (prev * 0.8) + (data.cpu * 0.2));
+        setSmoothedMemory(prev => prev === 0 ? data.memory.percent : (prev * 0.8) + (data.memory.percent * 0.2));
+        setSmoothedGpu(prev => prev === 0 ? data.temperature.gpu : (prev * 0.8) + (data.temperature.gpu * 0.2));
+
         // Chart verisine ekle (30 saniye için 30 veri noktası - her 1 saniyede bir, optimize edilmiş)
         const now = new Date();
         const timeStr = `${now.getMinutes()}:${now.getSeconds().toString().padStart(2, '0')}`;
         setChartData(prev => {
+          // Tüm veriler için ekstra smoothing (frontend tarafında)
+          let smoothedCpu = data.cpu;
+          let smoothedMemory = data.memory.percent;
+          let smoothedGpu = data.temperature.gpu;
+          
+          if (prev.length > 0) {
+            const lastData = prev[prev.length - 1];
+            // Son değerle %80 oranında karıştır (daha smooth görünüm için)
+            smoothedCpu = (lastData.cpu * 0.8) + (data.cpu * 0.2);
+            smoothedMemory = (lastData.memory * 0.8) + (data.memory.percent * 0.2);
+            smoothedGpu = (lastData.gpu * 0.8) + (data.temperature.gpu * 0.2);
+          }
+          
           const newData = [...prev, { 
             time: timeStr, 
-            cpu: data.cpu, 
-            memory: data.memory.percent,
-            gpu: data.temperature.gpu
+            cpu: smoothedCpu, 
+            memory: smoothedMemory,
+            gpu: smoothedGpu
           }];
           return newData.slice(-30); // Son 30 veriyi tut (30 saniye - daha az memory kullanımı)
         });
@@ -156,12 +179,12 @@ const App: React.FC = () => {
               <span className="text-sm text-gray-500">CPU</span>
             </div>
             <div className="text-3xl font-bold text-blue-600 mb-2">
-              {metrics.cpu.toFixed(1)}%
+              {smoothedCpu.toFixed(1)}%
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
                 className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${metrics.cpu}%` }}
+                style={{ width: `${smoothedCpu}%` }}
               ></div>
             </div>
           </div>
@@ -175,7 +198,7 @@ const App: React.FC = () => {
               <span className="text-sm text-gray-500">Memory</span>
             </div>
             <div className="text-3xl font-bold text-green-600 mb-2">
-              {metrics.memory.percent.toFixed(1)}%
+              {smoothedMemory.toFixed(1)}%
             </div>
             <div className="text-sm text-gray-600">
               {metrics.memory.used.toFixed(2)} GB / {metrics.memory.total.toFixed(2)} GB
@@ -183,10 +206,11 @@ const App: React.FC = () => {
             <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
               <div 
                 className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${metrics.memory.percent}%` }}
+                style={{ width: `${smoothedMemory}%` }}
               ></div>
             </div>
           </div>
+
 
           {/* GPU Temperature Card */}
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
@@ -197,12 +221,12 @@ const App: React.FC = () => {
               <span className="text-sm text-gray-500">GPU Temp</span>
             </div>
             <div className="text-3xl font-bold text-orange-600 mb-2">
-              {metrics.temperature.gpu.toFixed(1)}°C
+              {smoothedGpu.toFixed(1)}°C
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
               <div 
                 className="bg-orange-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${Math.min(100, (metrics.temperature.gpu / 100) * 100)}%` }}
+                style={{ width: `${Math.min(100, (smoothedGpu / 100) * 100)}%` }}
               ></div>
             </div>
             <div className="text-sm text-gray-600">
